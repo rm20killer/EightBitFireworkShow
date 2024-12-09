@@ -2,7 +2,11 @@ package dev.rm20.eightbitfireworkshow.Show;
 
 import dev.rm20.eightbitfireworkshow.EightBitFireworkShow;
 import org.bukkit.Bukkit;
-
+import org.bukkit.Color;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
+import org.bukkit.entity.Firework;
+import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -83,8 +87,59 @@ public class ShowManager {
     }
 
     private static void spawnFirework(Map<?, ?> fireworkData) {
-        // ... (Extract firework data from fireworkData map)
-        // ... (Create Firework entity, set its FireworkMeta, and launch it)
+        // Extract firework data
+        String type = (String) fireworkData.get("type");
+        List<String> colors = (List<String>) fireworkData.get("colors");
+        List<String> fadeColors = (List<String>) fireworkData.get("fade_colors");
+        boolean flicker = (boolean) fireworkData.getOrDefault("flicker", false);
+        boolean trail = (boolean) fireworkData.getOrDefault("trail", false);
+        int power = (int) fireworkData.getOrDefault("power", 1);
+        Map<?, ?> locationData = (Map<?, ?>) fireworkData.get("location");
+        double x = (double) locationData.get("x");
+        double y = (double) locationData.get("y");
+        double z = (double) locationData.get("z");
+
+        // Create Firework entity
+        Location location = new Location(Bukkit.getWorld("world"), x, y, z); // Replace "world" with your world name
+        Firework firework = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK);
+        FireworkMeta meta = firework.getFireworkMeta();
+
+        // Create FireworkEffect
+        FireworkEffect.Builder effectBuilder = FireworkEffect.builder();
+        effectBuilder.with(FireworkEffect.Type.valueOf(type)); // Set firework type
+
+        // Add colors
+        for (String color : colors) {
+            if (color.startsWith("#")) {
+                effectBuilder.withColor(Color.fromRGB(Integer.parseInt(color.substring(1), 16)));
+            } else {
+                effectBuilder.withColor(Color.fromName(color));
+            }
+        }
+
+        // Add fade colors (if any)
+        if (fadeColors != null) {
+            for (String fadeColor : fadeColors) {
+                if (fadeColor.startsWith("#")) {
+                    effectBuilder.withFade(Color.fromRGB(Integer.parseInt(fadeColor.substring(1), 16)));
+                } else {
+                    effectBuilder.withFade(Color.fromName(fadeColor));
+                }
+            }
+        }
+
+        // Add flicker and trail effects
+        if (flicker) {
+            effectBuilder.withFlicker();
+        }
+        if (trail) {
+            effectBuilder.withTrail();
+        }
+
+        // Set the FireworkEffect
+        meta.addEffect(effectBuilder.build());
+        meta.setPower(power);
+        firework.setFireworkMeta(meta);
     }
 
     private static void spawnParticles(Map<?, ?> particleData) {

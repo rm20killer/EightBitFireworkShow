@@ -1,0 +1,4 @@
+name: EightBitFireworkShow
+version: '${version}'
+main: dev.rm20.eightbitfireworkshow.EightBitFireworkShow
+api-version: '1.21'
